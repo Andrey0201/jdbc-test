@@ -1,0 +1,75 @@
+insert into my_store.customers (creation_date, email, name, age)
+values ('2022-11-10', 'oleg@gm.com', 'Oleg', 22),
+       ('2022-11-15', 'olena@gm.com', 'Olena', 24);
+
+
+insert into my_store.orders (customer_id, creation_date, product, price)
+values (1, '2022-11-08', 'Usb Flash', 200),
+       (2, '2022-11-12', 'Usb Flash', 220),
+       (2, '2022-11-13', 'Notebook Battery', 2000),
+       (3, '2022-11-15', 'Led lamp', 600),
+       (3, '2022-11-16', 'Led lamp', 800);
+
+
+select * from my_store.customers order by age asc ;
+
+
+select customer_name from (
+    select name as customer_name,
+           email as customer_email
+    from my_store.customers) as result;
+
+select product, custmrs.name,
+       avg(price) as avg_price,
+       max(price) as maximum_price,
+       count(orders.id) as all_count
+from my_store.orders orders
+         left join my_store.customers custmrs on custmrs.id = orders.customer_id
+where price > 200
+group by product, custmrs.name
+having max(price) > 1000
+order by product desc, avg_price asc;
+
+
+
+select * from my_store.orders
+ left join my_store.customers custmrs on custmrs.id = orders.customer_id
+where custmrs.age > 23;
+
+
+
+CREATE TABLE IF NOT EXISTS my_store.custom_orders
+(
+    id               serial,
+    customer_id      integer,
+    apply_date       date,
+    product          text NOT NULL,
+    price            int,
+    primary key (id)
+);
+
+insert into my_store.custom_orders (customer_id, apply_date, product, price)
+values (1, '2022-11-18', 'Usb Flash', 1200),
+       (2, '2022-11-22', 'Usb Flash', 1220),
+       (2, '2022-11-23', 'Notebook Battery', 12000),
+       (3, '2022-11-25', 'Led lamp', 1600),
+       (3, '2022-11-26', 'Led lamp', 1800);
+
+
+select customer_id, my_date, product, price from (
+    select customer_id, apply_date as my_date, product, price from my_store.custom_orders
+    UNION
+    select customer_id, creation_date as my_date, product, price  from my_store.orders) as union_result
+where price > 1000;
+
+
+update my_store.customers
+set email = 'new_igor@gm.com', age = 26
+where id = 1;
+
+
+
+delete from my_store.orders where customer_id = 2;
+delete from my_store.customers where id = 3;
+
+
